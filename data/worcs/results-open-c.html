@@ -1,0 +1,600 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE> Trackside Online Results Reporting </TITLE>
+<script language="JavaScript">
+<!--
+function MM_jumpMenu(targ,selObj,restore){ //v3.0
+  eval(targ+".location='"+selObj.options[selObj.selectedIndex].value+"'");
+  if (restore) selObj.selectedIndex=0;
+}
+//-->
+</script>
+<script>
+function printpr()
+{
+var OLECMDID = 7;
+var PROMPT = 1; // 2 DONTPROMPTUSER 
+var WebBrowser = '<OBJECT ID="WebBrowser1" WIDTH=0 HEIGHT=0 CLASSID="CLSID:8856F961-340A-11D0-A96B-00C04FD705A2"></OBJECT>';
+document.body.insertAdjacentHTML('beforeEnd', WebBrowser); 
+WebBrowser1.ExecWB(OLECMDID, PROMPT);
+WebBrowser1.outerHTML = "";
+}
+</script>
+<link href="include/style.css" rel="stylesheet" type="text/css">
+</HEAD>
+<BODY onload="window.focus()">
+<form name="form1" method="post" action="">
+  <table width="100%" border="0" cellpadding="2" cellspacing="1" class="tableBorder">
+    <tr> 
+      <td width="33%" align="left" valign="top" class="mainHeader"><img src="images/worcs.gif" width="154" height="75"></td>
+      <td width="33%" align="center" valign="bottom" class="tableBorder">
+        <p><span class="mainBigHeaderText">SHORTY'S BREAKOUT GP Results</span><br>
+          <span class="mainBigHeaderText">BLYTHE, CA</span><br>
+          <span class="mainSmallHeaderText">Friday, January 23, 2026 <br>
+          &nbsp; </span></p>
+        </td>
+      <td width="33%" align="right" valign="top" class="mainHeader">
+        <table width="100%" border="0" cellpadding="0" cellspacing="1" class="mainSmallHeaderText">
+          <tr> 
+            <td width="100%">&nbsp;</td>
+            <td nowrap><a href="javascript:window.close();"><img src="images/close_blue.gif" alt="Close this window" width="15" height="15" border="0" align="middle"></a>&nbsp;&nbsp;<a href="javascript:window.close();" class="closeWindow" Title="Close this window">Close 
+              &nbsp;Window</a></td>
+          </tr>
+          <tr> 
+            <td width="100%">&nbsp;</td>
+            <td nowrap><a href="javascript:window.print();"><img src="images/print.gif" alt="Print this report" border="0" align="middle"></a>&nbsp;&nbsp;<a href="javascript:window.print();" class="tableDataHeader" Title="Print this report">Print</a>&nbsp;|&nbsp;<a href="javascript:printpr();" class="tableDataHeader" title="Open a print preview window">Preview</a></td
+          >
+          </tr>
+          <tr> 
+            <td width="100%">&nbsp;</td>
+            <td nowrap><a href="laptimes.asp?s=2&e=1&c=528&rnd="><img src="images/laptimes2.gif" alt="View laptimes for this class" width="16" height="16" border="0" align="middle"></a>&nbsp;&nbsp;<a href="laptimes.asp?s=2&e=1&c=528&rnd=" class="tableDataHeader" Title="View laptimes for this class">View 
+              &nbsp;Laptimes</a></td>
+          </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td nowrap>
+			
+				<a href="seriespoints.asp?s=2&c=528" class="tableDataHeader" Title="Series points for this class"><img src="images/points.gif" border="0" align="middle"></a>&nbsp;&nbsp;<a href="seriespoints.asp?s=2&c=528" class="tableDataHeader" Title="Series points for this class">Class&nbsp;Points</a></td>
+			
+          </tr>
+        </table>
+        
+      </td>
+    </tr>
+    <tr> 
+      <td colspan="3" class="tableNav"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+          <tr class="tableNav"> 
+            <td align="left">Navigation&nbsp; <select name='c' onChange="MM_jumpMenu('self',this,0)"><option value='results.asp?s=2&c=624&e=1' >12IN  (EBIKE)</option><option value='results.asp?s=2&c=647&e=1' >Sportsman 3</option><option value='results.asp?s=2&c=648&e=1' >Sportsman 10</option><option value='results.asp?s=2&c=528&e=1'  Selected>OPEN C (MC)</option><option value='results.asp?s=2&c=59&e=1' >60+ A (MC)</option><option value='results.asp?s=2&c=582&e=1' >60+ B (MC)</option><option value='results.asp?s=2&c=583&e=1' >60+ C (MC)</option><option value='results.asp?s=2&c=114&e=1' >WOM C (MC)</option><option value='results.asp?s=2&c=54&e=1' >VINT/EVOL '75-'85</option><option value='results.asp?s=2&c=512&e=1' >EVO MODERN '85-'96</option><option value='results.asp?s=2&c=205&e=1' >85 OPEN (MC)</option><option value='results.asp?s=2&c=84&e=1' >30+ A (MC)</option><option value='results.asp?s=2&c=85&e=1' >30+ B (MC)</option><option value='results.asp?s=2&c=81&e=1' >WOM A (MC)</option><option value='results.asp?s=2&c=109&e=1' >WOM B (MC)</option><option value='results.asp?s=2&c=102&e=1' >12-19 SPT A (MC)</option><option value='results.asp?s=2&c=171&e=1' >12-19 SPT B (MC)</option><option value='results.asp?s=2&c=611&e=1' >OPEN PRO (MC)</option><option value='results.asp?s=2&c=575&e=1' >VET PRO (MC)</option><option value='results.asp?s=2&c=55&e=1' >12-19 SPT C (MC)</option><option value='results.asp?s=2&c=56&e=1' >30+ C (MC)</option><option value='results.asp?s=2&c=57&e=1' >40+ C (MC)</option><option value='results.asp?s=2&c=58&e=1' >50+ A (MC)</option><option value='results.asp?s=2&c=180&e=1' >50+ B (MC)</option><option value='results.asp?s=2&c=219&e=1' >50+ C (MC)</option><option value='results.asp?s=2&c=570&e=1' >JR. VET C (MC)</option><option value='results.asp?s=2&c=596&e=1' >50cc A (MC)</option><option value='results.asp?s=2&c=597&e=1' >50cc B (MC)</option><option value='results.asp?s=2&c=622&e=1' >50cc C (MC)</option><option value='results.asp?s=2&c=43&e=1' >65 OPEN (MC)</option><option value='results.asp?s=2&c=74&e=1' >65 BEGINNER (MC)</option><option value='results.asp?s=2&c=42&e=1' >85 BEGINNER (MC)</option><option value='results.asp?s=2&c=45&e=1' >GIRLS 12-16(MC)</option><option value='results.asp?s=2&c=431&e=1' >50cc STK (ATV)</option><option value='results.asp?s=2&c=438&e=1' >90 PROD (ATV)</option><option value='results.asp?s=2&c=434&e=1' >70 PROD (ATV)</option><option value='results.asp?s=2&c=48&e=1' >450 A (MC)</option><option value='results.asp?s=2&c=49&e=1' >450 B (MC)</option><option value='results.asp?s=2&c=51&e=1' >250 A (MC)</option><option value='results.asp?s=2&c=52&e=1' >250 B (MC)</option><option value='results.asp?s=2&c=63&e=1' >125 A (MC)</option><option value='results.asp?s=2&c=64&e=1' >125 B (MC)</option><option value='results.asp?s=2&c=568&e=1' >JR. VET A (MC)</option><option value='results.asp?s=2&c=232&e=1' >WOM PRO (MC)</option><option value='results.asp?s=2&c=586&e=1' >50+ B (ATV)</option><option value='results.asp?s=2&c=587&e=1' >50+ C (ATV)</option><option value='results.asp?s=2&c=465&e=1' >WOM B (ATV)</option><option value='results.asp?s=2&c=466&e=1' >WOM C (ATV)</option><option value='results.asp?s=2&c=439&e=1' >250 13-15 (ATV)</option><option value='results.asp?s=2&c=610&e=1' >60+ (ATV)</option><option value='results.asp?s=2&c=447&e=1' >PROD A (ATV)</option><option value='results.asp?s=2&c=448&e=1' >PROD B (ATV)</option><option value='results.asp?s=2&c=450&e=1' >OPEN A (ATV)</option><option value='results.asp?s=2&c=451&e=1' >OPEN B (ATV)</option><option value='results.asp?s=2&c=462&e=1' >50+ A (ATV)</option><option value='results.asp?s=2&c=464&e=1' >WOM A (ATV)</option><option value='results.asp?s=2&c=598&e=1' >WOM PRO (ATV)</option><option value='results.asp?s=2&c=569&e=1' >JR. VET B (MC)</option><option value='results.asp?s=2&c=86&e=1' >40+ A (MC)</option><option value='results.asp?s=2&c=87&e=1' >40+ B (MC)</option><option value='results.asp?s=2&c=526&e=1' >OPEN A (MC)</option><option value='results.asp?s=2&c=527&e=1' >OPEN B (MC)</option><option value='results.asp?s=2&c=78&e=1' >450 C (MC)</option><option value='results.asp?s=2&c=80&e=1' >250 C (MC)</option><option value='results.asp?s=2&c=77&e=1' >125 C (MC)</option><option value='results.asp?s=2&c=108&e=1' >SUPER MINI OPEN (MC)</option><option value='results.asp?s=2&c=495&e=1' >SUPER MINI BEGINNER (MC)</option><option value='results.asp?s=2&c=76&e=1' >50cc 7-8 (MC)</option><option value='results.asp?s=2&c=75&e=1' >50cc 4-6 (MC)</option><option value='results.asp?s=2&c=602&e=1' >65cc 7-9 (MC)</option><option value='results.asp?s=2&c=603&e=1' >65cc 10-11(MC)</option><option value='results.asp?s=2&c=594&e=1' >OPEN 90 PROD (ATV)</option><option value='results.asp?s=2&c=593&e=1' >OPEN 70 PROD (ATV)</option><option value='results.asp?s=2&c=588&e=1' >PRO 450 (MC)</option><option value='results.asp?s=2&c=89&e=1' >PRO 250 (MC)</option><option value='results.asp?s=2&c=440&e=1' >250 13-15 LMT (ATV)</option><option value='results.asp?s=2&c=454&e=1' >SPT 15-29 B (ATV)</option><option value='results.asp?s=2&c=453&e=1' >SPT 15-29 A (ATV)</option><option value='results.asp?s=2&c=467&e=1' >4X4 OPEN (ATV)</option><option value='results.asp?s=2&c=449&e=1' >PROD C (ATV)</option><option value='results.asp?s=2&c=456&e=1' >30+ A (ATV)</option><option value='results.asp?s=2&c=457&e=1' >30+ B (ATV)</option><option value='results.asp?s=2&c=459&e=1' >40+ A (ATV)</option><option value='results.asp?s=2&c=460&e=1' >40+ B (ATV)</option><option value='results.asp?s=2&c=408&e=1' >PRO (ATV)</option><option value='results.asp?s=2&c=409&e=1' >PRO-AM (ATV)</option><option value='results.asp?s=2&c=496&e=1' >Sportsman 1</option><option value='results.asp?s=2&c=644&e=1' >70+ (MC)</option><option value='results.asp?s=2&c=645&e=1' >HWT 240+</option></select> &nbsp;</td>
+            <td align="right">&nbsp;</td>
+          </tr>
+        </table></td>
+    </tr>
+    <tr class="tabledata"> 
+      <td colspan="3"><table width="100%" border="0" cellspacing="0" cellpadding="2">
+          <tr class="tableDataHeader"> 
+            <td><table width="100%" border="0" cellspacing="0" cellpadding="2">
+                <tr class="tableDataHeader"> 
+                  <td align="left">OPEN C (MC) <span class="tableDataHeaderText">- Class Results</span></td>
+                </tr>
+              </table>
+              
+            </td>
+          </tr>
+        </table>
+        <table width="100%" border="0" cellspacing="0" cellpadding="2">
+          <tr class="tableDataFieldHeader" align="center"> 
+            <td>Place</td>
+            <td>Nbr</td>
+            <td align="left">Name</td>
+            <td>Overall Pos</td>
+            <td>Points Earned</td>
+            <td nowrap>Fastest Lap</td>
+            <td>Laps</td>
+            <td>Elapsed Time</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableData"> 
+            <td><B>1</B></td>
+            <td>#1984</td>
+            <td align="left" ><strong><a href="racer.asp?racer=22190&s=2" title="Racer detail">CARTER&nbsp;DICKEY</a></strong>&nbsp;-&nbsp;KTM<BR> SAN TAN VALLEY,&nbsp;AZ</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">13</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">25</a></td>
+				
+			<td nowrap>08:19.982<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">6</a></td>
+            <td>00:51:53.935</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableDataAlt"> 
+            <td><B>2</B></td>
+            <td>#144</td>
+            <td align="left" ><strong><a href="racer.asp?racer=21758&s=2" title="Racer detail">JAMES&nbsp;WEISMAN</a></strong>&nbsp;-&nbsp;YAM<BR> PEORIA,&nbsp;AZ</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">18</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">22</a></td>
+				
+			<td nowrap>08:25.515<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">6</a></td>
+            <td>00:52:35.704</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableData"> 
+            <td><B>3</B></td>
+            <td>#355</td>
+            <td align="left" ><strong><a href="racer.asp?racer=19543&s=2" title="Racer detail">KELLEN&nbsp;HARDY</a></strong>&nbsp;-&nbsp;KTM<BR> LAS VEGAS,&nbsp;NV</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">20</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">20</a></td>
+				
+			<td nowrap>08:36.166<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">6</a></td>
+            <td>00:53:00.252</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableDataAlt"> 
+            <td><B>4</B></td>
+            <td>#2061</td>
+            <td align="left" ><strong><a href="racer.asp?racer=22220&s=2" title="Racer detail">TREY&nbsp;GUNTER</a></strong>&nbsp;-&nbsp;TRI<BR> GILBERT,&nbsp;AZ</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">22</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">18</a></td>
+				
+			<td nowrap>08:36.256<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">6</a></td>
+            <td>00:53:56.455</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableData"> 
+            <td><B>5</B></td>
+            <td>#819</td>
+            <td align="left" ><strong><a href="racer.asp?racer=22149&s=2" title="Racer detail">NICOLAS&nbsp;KOCH</a></strong>&nbsp;-&nbsp;YAM<BR> TEMPE,&nbsp;AR</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">23</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">16</a></td>
+				
+			<td nowrap>08:42.908<br>Lap 3</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">6</a></td>
+            <td>00:54:04.219</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableDataAlt"> 
+            <td><B>6</B></td>
+            <td>#1998</td>
+            <td align="left" ><strong><a href="racer.asp?racer=22207&s=2" title="Racer detail">CALEB&nbsp;AKINS</a></strong>&nbsp;-&nbsp;HQV<BR> WOODLAND,&nbsp;CA</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">24</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">15</a></td>
+				
+			<td nowrap>08:39.630<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">6</a></td>
+            <td>00:54:09.993</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableData"> 
+            <td><B>7</B></td>
+            <td>#2095</td>
+            <td align="left" ><strong><a href="racer.asp?racer=21706&s=2" title="Racer detail">EDGAR&nbsp;MAGALLANES</a></strong>&nbsp;-&nbsp;GAS<BR> PHOENIX,&nbsp;AZ</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">25</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">14</a></td>
+				
+			<td nowrap>08:45.919<br>Lap 6</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">6</a></td>
+            <td>00:54:13.986</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableDataAlt"> 
+            <td><B>8</B></td>
+            <td>#1987</td>
+            <td align="left" ><strong><a href="racer.asp?racer=21592&s=2" title="Racer detail">GUNNER&nbsp;DEATHERAGE</a></strong>&nbsp;-&nbsp;YAM<BR> ELOY,&nbsp;AR</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">27</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">13</a></td>
+				
+			<td nowrap>08:50.179<br>Lap 3</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">6</a></td>
+            <td>00:54:39.443</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableData"> 
+            <td><B>9</B></td>
+            <td>#870</td>
+            <td align="left" ><strong><a href="racer.asp?racer=22173&s=2" title="Racer detail">LANCE&nbsp;LANKFORD</a></strong>&nbsp;-&nbsp;YAM<BR> KINGMAN,&nbsp;AZ</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">28</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">12</a></td>
+				
+			<td nowrap>08:52.809<br>Lap 3</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">6</a></td>
+            <td>00:54:40.569</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableDataAlt"> 
+            <td><B>10</B></td>
+            <td>#999</td>
+            <td align="left" ><strong><a href="racer.asp?racer=19655&s=2" title="Racer detail">CREW&nbsp;GRIFFIOEN</a></strong>&nbsp;-&nbsp;HON<BR> FLORENCE,&nbsp;AZ</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">29</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">11</a></td>
+				
+			<td nowrap>08:56.186<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">6</a></td>
+            <td>00:55:09.756</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableData"> 
+            <td><B>11</B></td>
+            <td>#525</td>
+            <td align="left" ><strong><a href="racer.asp?racer=22137&s=2" title="Racer detail">KASON&nbsp;SCHNEIDER</a></strong>&nbsp;-&nbsp;SUZ<BR> HENDERSON,&nbsp;NV</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">30</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">10</a></td>
+				
+			<td nowrap>08:49.588<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">6</a></td>
+            <td>00:55:11.253</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableDataAlt"> 
+            <td><B>12</B></td>
+            <td>#2089</td>
+            <td align="left" ><strong><a href="racer.asp?racer=22168&s=2" title="Racer detail">AUSTIN&nbsp;HARKER</a></strong>&nbsp;-&nbsp;KTM<BR> WASHINGTON,&nbsp;UT</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">32</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">9</a></td>
+				
+			<td nowrap>08:54.516<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">6</a></td>
+            <td>00:55:53.872</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableData"> 
+            <td><B>13</B></td>
+            <td>#2058</td>
+            <td align="left" ><strong><a href="racer.asp?racer=22217&s=2" title="Racer detail">ANDREW&nbsp;KRIZAN</a></strong>&nbsp;-&nbsp;HQV<BR> MARANA,&nbsp;AZ</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">36</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">8</a></td>
+				
+			<td nowrap>09:08.408<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">6</a></td>
+            <td>00:57:21.229</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableDataAlt"> 
+            <td><B>14</B></td>
+            <td>#2098</td>
+            <td align="left" ><strong><a href="racer.asp?racer=21627&s=2" title="Racer detail">JAMES&nbsp;MERMELSTEIN</a></strong>&nbsp;-&nbsp;YAM<BR> GILBERT,&nbsp;AZ</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">38</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">7</a></td>
+				
+			<td nowrap>09:35.529<br>Lap 4</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">5</a></td>
+            <td>00:48:40.694</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableData"> 
+            <td><B>15</B></td>
+            <td>#1993</td>
+            <td align="left" ><strong><a href="racer.asp?racer=22198&s=2" title="Racer detail">SEBASTIAN&nbsp;MORALES</a></strong>&nbsp;-&nbsp;KTM<BR> GUADALAJARA,&nbsp;</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">39</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">6</a></td>
+				
+			<td nowrap>09:22.675<br>Lap 4</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">5</a></td>
+            <td>00:49:14.543</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableDataAlt"> 
+            <td><B>16</B></td>
+            <td>#844</td>
+            <td align="left" ><strong><a href="racer.asp?racer=20995&s=2" title="Racer detail">LANCE&nbsp;PRESLAR</a></strong>&nbsp;-&nbsp;KTM<BR> TEMPE,&nbsp;AZ</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">41</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">5</a></td>
+				
+			<td nowrap>09:37.498<br>Lap 3</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">5</a></td>
+            <td>00:49:21.289</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableData"> 
+            <td><B>17</B></td>
+            <td>#673</td>
+            <td align="left" ><strong><a href="racer.asp?racer=21929&s=2" title="Racer detail">CAMERON&nbsp;DAVIS</a></strong>&nbsp;-&nbsp;GAS<BR> APPLE VALLEY,&nbsp;CA</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">44</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">4</a></td>
+				
+			<td nowrap>09:13.018<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">5</a></td>
+            <td>00:49:38.757</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableDataAlt"> 
+            <td><B>18</B></td>
+            <td>#2092</td>
+            <td align="left" ><strong><a href="racer.asp?racer=22152&s=2" title="Racer detail">ENZO&nbsp;JACOBSEN</a></strong>&nbsp;-&nbsp;HON<BR> SANTA BARBARA,&nbsp;CA</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">46</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">3</a></td>
+				
+			<td nowrap>09:41.296<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">5</a></td>
+            <td>00:50:13.950</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableData"> 
+            <td><B>19</B></td>
+            <td>#1983</td>
+            <td align="left" ><strong><a href="racer.asp?racer=22191&s=2" title="Racer detail">PATRICK&nbsp;FRANKLIN</a></strong>&nbsp;-&nbsp;YAM<BR> SAN TAN,&nbsp;AZ</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">50</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">2</a></td>
+				
+			<td nowrap>09:51.315<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">5</a></td>
+            <td>00:51:08.096</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableDataAlt"> 
+            <td><B>20</B></td>
+            <td>#426.</td>
+            <td align="left" ><strong><a href="racer.asp?racer=20647&s=2" title="Racer detail">CARSON&nbsp;CONWAY</a></strong>&nbsp;-&nbsp;KTM<BR> BOULDER CITY,&nbsp;NV</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">56</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">1</a></td>
+				
+			<td nowrap>10:11.641<br>Lap 3</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">5</a></td>
+            <td>00:52:58.170</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableData"> 
+            <td><B>21</B></td>
+            <td>#624</td>
+            <td align="left" ><strong><a href="racer.asp?racer=20646&s=2" title="Racer detail">ADAM&nbsp;CONWAY</a></strong>&nbsp;-&nbsp;YAM<BR> BOULDER CITY,&nbsp;NV</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">65</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">1</a></td>
+				
+			<td nowrap>10:21.167<br>Lap 5</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">5</a></td>
+            <td>00:56:32.806</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableDataAlt"> 
+            <td><B>22</B></td>
+            <td>#194</td>
+            <td align="left" ><strong><a href="racer.asp?racer=22155&s=2" title="Racer detail">MARC&nbsp;NOVAES</a></strong>&nbsp;-&nbsp;GAS<BR> GLENDALE,&nbsp;AZ</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">67</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">1</a></td>
+				
+			<td nowrap>10:57.487<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">5</a></td>
+            <td>00:56:58.127</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableData"> 
+            <td><B>23</B></td>
+            <td>#409</td>
+            <td align="left" ><strong><a href="racer.asp?racer=21709&s=2" title="Racer detail">TREVOR&nbsp;EDWARDS</a></strong>&nbsp;-&nbsp;YAM<BR> TUCSON,&nbsp;AZ</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">71</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">1</a></td>
+				
+			<td nowrap>11:37.399<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">4</a></td>
+            <td>00:48:19.667</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableDataAlt"> 
+            <td><B>24</B></td>
+            <td>#1977</td>
+            <td align="left" ><strong><a href="racer.asp?racer=22157&s=2" title="Racer detail">TYLER&nbsp;SMITH</a></strong>&nbsp;-&nbsp;KTM<BR> RANCHO CUCAMONGA,&nbsp;CA</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">74</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">1</a></td>
+				
+			<td nowrap>12:32.673<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">4</a></td>
+            <td>00:52:20.739</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableData"> 
+            <td><B>DNF</B></td>
+            <td>#1980</td>
+            <td align="left" ><strong><a href="racer.asp?racer=22175&s=2" title="Racer detail">LOGAN&nbsp;WENNERBERG</a></strong>&nbsp;-&nbsp;KAW<BR> HENDERSON,&nbsp;NE</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">DNF</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">0</a></td>
+				
+			<td nowrap>10:17.484<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">3</a></td>
+            <td>00:31:53.701</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableDataAlt"> 
+            <td><B>DNF</B></td>
+            <td>#763</td>
+            <td align="left" ><strong><a href="racer.asp?racer=12996&s=2" title="Racer detail">JADE&nbsp;THOMSON</a></strong>&nbsp;-&nbsp;KTM<BR> LAS VEGAS,&nbsp;NV</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">DNF</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">0</a></td>
+				
+			<td nowrap>09:09.398<br>Lap 2</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">2</a></td>
+            <td>00:19:52.258</td>
+          </tr>
+          
+          <tr valign="top" align="center"  class="tableData"> 
+            <td><B>DNF</B></td>
+            <td>#1999</td>
+            <td align="left" ><strong><a href="racer.asp?racer=18196&s=2" title="Racer detail">CHAD&nbsp;GOODRICH</a></strong>&nbsp;-&nbsp;KTM<BR> CATHEDRAL CITY,&nbsp;CA</td>
+            <td>
+			
+			<a href="overall.asp?e=1&c=528&s=2" title="View event overalls">DNF</a>
+			
+			</td>
+            
+			
+			<td><a href="seriespoints.asp?s=2&c=528" title="View series points for this class">0</a></td>
+				
+			<td nowrap>-</td>
+            <td><a href="laptimes.asp?s=2&e=1&c=528&rnd=" title="View laptimes">1</a></td>
+            <td>00:12:38.937</td>
+          </tr>
+          
+          <tr class="tableData"> 
+            <td colspan="8">&nbsp;</td>
+          </tr>
+          <tr class="tableData"> 
+            <td colspan="8" class="tableDataFooter"><a href="javascript:window.close()" class="tableDataFooter"><img src="images/close.gif" alt="Close this window" width="15" height="15" border="0" align="middle"></a> 
+              <a href="javascript:window.close()" class="tableNav" Title="Close this window">Close Window</a></td>
+          </tr>
+        </table></td>
+    </tr>
+  </table>
+</form>
+<p>
+<div align="center">
+    <a href="http://www.tracksidesoftware.com/" target="_blank"><img src="images/trackside.gif" border="0"></a>
+</div>
+</p>

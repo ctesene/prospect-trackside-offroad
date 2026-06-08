@@ -1,0 +1,29 @@
+{
+  "name": "trackside-offroad-process",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Trackside offroad results scraper — Redis stream runner + listener",
+  "main": "trackside-offroad-listener.js",
+  "scripts": {
+    "postinstall": "PRISMA_GENERATE_SKIP_AUTOINSTALL=1 prisma generate --schema ./prisma/schema.prisma",
+    "prisma:generate": "PRISMA_GENERATE_SKIP_AUTOINSTALL=1 prisma generate --schema ./prisma/schema.prisma",
+    "verify:prisma-client": "node ./scripts/verify-prisma-client.js",
+    "start": "node trackside-offroad-listener.js",
+    "execute": "node trackside-offroad-runner.js",
+    "trackside-offroad:scrape:event": "node scripts/scrape-single-event.js",
+    "test:parse": "node --test lib/trackside-offroad-scrape.test.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@prisma/client": "5.22.0",
+    "@prisma/extension-read-replicas": "0.3.0",
+    "@sentry/node": "^8.30.0",
+    "@vurb-tech/shared": "github:ctesene/vurb-tech-shared",
+    "axios": "^1.12.2",
+    "cheerio": "^1.0.0",
+    "dotenv": "^17.3.1",
+    "prisma": "5.22.0"
+  }
+}
