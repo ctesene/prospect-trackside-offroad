@@ -20,7 +20,7 @@
     "@prisma/client": "5.22.0",
     "@prisma/extension-read-replicas": "0.3.0",
     "@sentry/node": "^8.30.0",
-    "@vurb-tech/shared": "github:ctesene/vurb-tech-shared",
+    "@vurb-tech/shared": "git+https://github.com/ctesene/vurb-tech-shared.git",
     "axios": "^1.12.2",
     "cheerio": "^1.0.0",
     "dotenv": "^17.3.1",

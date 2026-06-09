@@ -34,5 +34,3 @@ Same Docker build pattern as `processes/mototally`: `COPY . .`, then `npm instal
 | `npm run trackside-offroad:scrape:event -- --site worcs --event 2026-1` | Scrape a single event locally                           |
 | `npm run test:parse`                                                    | Parser unit tests                                       |
 | `npm run verify:prisma-client`                                          | Assert Prisma client files exist (used in Docker build) |
-
-TEST DEPLOY

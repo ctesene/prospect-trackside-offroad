@@ -15,11 +15,16 @@ WORKDIR /app
 
 # GITHUB_TOKEN: Add as build secret in Coolify for private repo access
 ARG GITHUB_TOKEN
-RUN if [ -n "$GITHUB_TOKEN" ]; then \
-  git config --global url."https://${GITHUB_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/" && \
-  git config --global url."https://${GITHUB_TOKEN}:x-oauth-basic@github.com/".insteadOf "git@github.com:" && \
-  git config --global url."https://${GITHUB_TOKEN}:x-oauth-basic@github.com/".insteadOf "ssh://git@github.com/"; \
-fi
+RUN git config --global http.sslVerify false \
+  && if [ -n "$HTTP_PROXY" ]; then \
+    git config --global http.proxy "$HTTP_PROXY" && \
+    git config --global https.proxy "${HTTPS_PROXY:-$HTTP_PROXY}"; \
+  fi \
+  && if [ -n "$GITHUB_TOKEN" ]; then \
+    git config --global url."https://${GITHUB_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/" && \
+    git config --global url."https://${GITHUB_TOKEN}:x-oauth-basic@github.com/".insteadOf "git@github.com:" && \
+    git config --global url."https://${GITHUB_TOKEN}:x-oauth-basic@github.com/".insteadOf "ssh://git@github.com/"; \
+  fi
 
 COPY . .
 
@@ -33,7 +38,7 @@ RUN npm config set strict-ssl false \
     && npm config set fetch-timeout 300000 \
     && for attempt in 1 2 3 4 5; do \
       echo "npm install attempt ${attempt}/5"; \
-      NODE_TLS_REJECT_UNAUTHORIZED=0 npm install --omit=dev --ignore-scripts && break; \
+      GIT_SSL_NO_VERIFY=1 NODE_TLS_REJECT_UNAUTHORIZED=0 npm install --omit=dev --ignore-scripts && break; \
       if [ "$attempt" -eq 5 ]; then \
         echo "npm install failed after 5 attempts"; \
         exit 1; \
