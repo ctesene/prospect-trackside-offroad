@@ -19,7 +19,7 @@
   "dependencies": {
     "@prisma/client": "5.22.0",
     "@prisma/extension-read-replicas": "0.3.0",
-    "@sentry/node": "^8.30.0",
+    "@sentry/node": "^10.73.0",
     "@vurb-tech/shared": "github:ctesene/vurb-tech-shared",
     "axios": "^1.12.2",
     "cheerio": "^1.0.0",

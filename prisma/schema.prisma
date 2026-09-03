@@ -26,6 +26,7 @@ model RacePromoter {
   isLiveEnabled               Boolean                    @default(false)
   isSignupEnabled             Boolean                    @default(false)
   isEnhancedLiveTimingEnabled Boolean                    @default(false)
+  isPromoterBroadcastNotificationsEnabled Boolean        @default(false)
   state                       String?                    @default("")
   zipCode                     String?                    @default("")
   RaceEvents                  RaceEvent[]
@@ -35,6 +36,50 @@ model RacePromoter {
   Tracks                      Track[]
   OffroadRaceEvents           OffroadRaceEvent[]
   GiveawayCampaignPromoters   GiveawayCampaignPromoter[]
+  UserToRacePromoters         UserToRacePromoter[]
+  RacePromoterAdmins          RacePromoterAdmin[]
+  RacePromoterBroadcasts      RacePromoterBroadcast[]
+  AmaPromoters                AmaPromoter[]
+}
+
+model UserToRacePromoter {
+  id             String       @id @default(cuid())
+  userId         String
+  racePromoterId String
+  expiresAt      DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  User           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  RacePromoter   RacePromoter @relation(fields: [racePromoterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, racePromoterId])
+  @@index([racePromoterId, expiresAt])
+  @@index([expiresAt])
+}
+
+model RacePromoterAdmin {
+  id             String       @id @default(cuid())
+  userId         String
+  racePromoterId String
+  createdAt      DateTime     @default(now())
+  User           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  RacePromoter   RacePromoter @relation(fields: [racePromoterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, racePromoterId])
+}
+
+model RacePromoterBroadcast {
+  id             String       @id @default(cuid())
+  racePromoterId String
+  sentByUserId   String
+  title          String
+  body           String
+  recipientCount Int          @default(0)
+  createdAt      DateTime     @default(now())
+  RacePromoter   RacePromoter @relation(fields: [racePromoterId], references: [id], onDelete: Cascade)
+  SentByUser     User         @relation(fields: [sentByUserId], references: [id], onDelete: Cascade)
+
+  @@index([racePromoterId, createdAt])
 }
 
 model RaceEvent {
@@ -52,6 +97,7 @@ model RaceEvent {
   isHidden                 Boolean                 @default(false)
   isIncomplete             Boolean                 @default(false) // True while multi-day event is still running
   isNotificationsProcessed Boolean                 @default(false) // True when UserNotifications have been created for this event
+  isPinned                 Boolean                 @default(false) // Pin to top of Past Results
   eventUrl                 String
   scoringSystemEventId     String
   scoringTier              String                  @default("1")
@@ -69,15 +115,18 @@ model RaceEvent {
   avatarImageUrl           String? // Optional override for avatar image
   PhotoGalleries           RaceEventPhotoGallery[]
   RaceEventClassPhotos     RaceEventClassPhoto[]
+  RaceMedia                RaceMedia[]
   FantasyContests          FantasyContest[]
   GiveawayCampaigns        GiveawayCampaign[]
   TracksideRaceInfos       TracksideRaceInfo[]
+  AmaRace                  AmaRace?
 
   @@index([id]) // Index for related includes
   @@index([score, id], map: "race_event_score_id_idx")
   @@index([isIncomplete, racePromoterId]) // Index for finding incomplete events
   @@index([isIncomplete, isNotificationsProcessed]) // Index for finding events that need notification processing
   @@index([isHidden, racePromoterId], map: "race_event_hidden_promoter_idx")
+  @@index([isPinned, date], map: "race_event_pinned_date_idx")
   @@index([trackId])
 }
 
@@ -136,6 +185,7 @@ model Photographer {
   updatedAt                           DateTime                                @updatedAt
   PhotoGalleries                      RaceEventPhotoGallery[]
   RaceEventClassPhotos                RaceEventClassPhoto[]
+  RaceMedia                           RaceMedia[]
   TrackPhotos                         TrackPhoto[]
   TrackPhotoTaggedRiders              TrackPhotoTaggedRider[]
   PhotoLicensePurchases               PhotoLicensePurchase[]
@@ -190,6 +240,7 @@ model RaceEventClass {
   date                                DateTime
   scoringSystemEventClassId           String
   score                               Float?
+  isHidden                            Boolean                             @default(false) // Exclude this class from scoring and rider-facing results
   // Metadata tracking
   hasMetadata                         Boolean                             @default(false)
   // Metadata fields
@@ -200,17 +251,20 @@ model RaceEventClass {
   ageRange                            String?
   RaceEventClassResults               RaceEventClassResult[]
   RaceEventClassPhotos                RaceEventClassPhoto[]
+  RaceMedia                           RaceMedia[]
   RaceSeriesEvents                    RaceSeriesEvent[]
   RaceEvent                           RaceEvent                           @relation(fields: [raceEventId], references: [id], onDelete: Cascade)
   raceEventId                         String
   FantasyContests                     FantasyContest[]
   FantasyEntries                      FantasyEntry[]
   GiveawayCampaignEligibleRaceClasses GiveawayCampaignEligibleRaceClass[]
+  AmaRaceClass                        AmaRaceClass?
 
   @@index([id])
   @@index([score, id], map: "race_event_class_score_id_idx")
   @@index([raceEventId])
   @@index([date(sort: Desc), id], map: "rec_date_id_idx")
+  @@index([isHidden, raceEventId], map: "race_event_class_hidden_event_idx")
 }
 
 model RaceEventClassResult {
@@ -279,6 +333,29 @@ model RaceEventClassPhoto {
   @@index([status])
   @@index([contentCreatorId, createdAt])
   @@map("RaceEventClassPhotos")
+}
+
+model RaceMedia {
+  id                 String          @id @default(cuid())
+  title              String?
+  videoUrl           String
+  provider           String
+  externalVideoId    String
+  startSeconds       Int?
+  raceEventId        String
+  raceEventClassId   String?
+  contentCreatorId   String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  RaceEvent          RaceEvent       @relation(fields: [raceEventId], references: [id], onDelete: Cascade)
+  RaceEventClass     RaceEventClass? @relation(fields: [raceEventClassId], references: [id], onDelete: Cascade)
+  ContentCreator     Photographer?   @relation(fields: [contentCreatorId], references: [id], onDelete: SetNull)
+
+  @@index([raceEventId, createdAt])
+  @@index([raceEventClassId, createdAt])
+  @@index([createdAt])
+  @@index([contentCreatorId, createdAt])
+  @@map("RaceMedia")
 }
 
 model RiderIdPhoto {
@@ -500,9 +577,22 @@ model RaceLaptime {
   isRaceFastestLap       Boolean
   RaceEventClassResult   RaceEventClassResult @relation(fields: [raceEventClassResultId], references: [id], onDelete: Cascade)
   raceEventClassResultId String
+  Sections               RaceLaptimeSection[]
 
   @@unique([raceEventClassResultId, motoTypeId, motoId, lapNumber])
   @@index([raceEventClassResultId, positionNumber], map: "race_laptimes_result_position_idx")
+}
+
+model RaceLaptimeSection {
+  id            String      @id @default(cuid())
+  raceLaptimeId String
+  sectionNumber Int // 1..4 (Trackside data-s1..s4)
+  time          String? // null when loop missed for this section
+  RaceLaptime   RaceLaptime @relation(fields: [raceLaptimeId], references: [id], onDelete: Cascade)
+
+  @@unique([raceLaptimeId, sectionNumber])
+  @@index([raceLaptimeId])
+  @@map("RaceLaptimeSections")
 }
 
 model OffroadRaceEvent {
@@ -615,6 +705,7 @@ model User {
   forgotPasswordCode              String?
   forgotPasswordLockoutCount      Int                             @default(0)
   pushNotificationsEnabled        Boolean                         @default(false)
+  isBetaFeaturesEnabled           Boolean                         @default(false)
   isDeleted                       Boolean                         @default(false)
   isAdmin                         Boolean                         @default(false)
   createdAt                       DateTime                        @default(now())
@@ -641,6 +732,8 @@ model User {
   FavoriteTracks                  UserTrackFavorited[]
   TracksAdmin                     TrackAdmin[]
   TrackPracticeSessionRsvps       UserTrackPracticeSessionRsvp[]
+  RiderIdPracticeSessions         RiderIdPracticeSession[]
+  RiderXpEvents                   RiderXpEvent[]
   IncentiveRedemptions            IncentiveRedemption[]
   UserIncentives                  UserIncentive[]
   AdOrders                        AdOrder[]
@@ -656,6 +749,13 @@ model User {
   affiliateCodeId                 String?
   Photographer                    Photographer?                   @relation(fields: [photographerId], references: [id])
   photographerId                  String?
+  Trainer                         Trainer?                        @relation(fields: [trainerId], references: [id])
+  trainerId                       String?
+  TrainerAdmins                   TrainerAdmin[]
+  TrainerFollowing                TrainerFollower[]               @relation("UserFollowingTrainer")
+  TrainerEventAttendances         TrainerEventAttendance[]
+  TrainerChatMembers              TrainerChatMember[]
+  TrainerChatMessages             TrainerChatMessage[]
   /// Public fantasy identity (leaderboards, groups). Not the same as social handles elsewhere.
   username                        String?                         @unique
   /// US state code or label for display / state rankings context
@@ -673,6 +773,10 @@ model User {
   GiveawayEnrollments             GiveawayEnrollment[]
   AssignedGiveawayOutcomes        GiveawayRiderOutcome[]          @relation("GiveawayOutcomeAssigner")
   GiveawaySweepstakeDrawsRecorded GiveawaySweepstakeDraw[]        @relation("GiveawayDrawRecorder")
+  UserToRacePromoters             UserToRacePromoter[]
+  RacePromoterAdmins              RacePromoterAdmin[]
+  RacePromoterBroadcastsSent      RacePromoterBroadcast[]
+  WearableConnections             WearableConnection[]
 }
 
 model FeedRankingConfig {
@@ -820,6 +924,9 @@ model UserPushNotificationPreference {
   // Events
   eventsUpcomingEventReminders Boolean @default(true)
 
+  // Race promoters
+  promotersBroadcastAlerts Boolean @default(true)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -900,6 +1007,7 @@ model RiderId {
   photoHash                              String?
   riderNumber                            String?
   location                               String?
+  country                                String                           @default("US")
   latitude                               Float?
   longitude                              Float?
   isGeoCoded                             Boolean                          @default(false)
@@ -950,6 +1058,8 @@ model RiderId {
   UserRiderNotification                  UserRiderNotification[]
   User                                   User[]
   TracksShredded                         RiderIdTrackShredded[]
+  PracticeSessions                       RiderIdPracticeSession[]
+  XpEvents                               RiderXpEvent[]
   NewsItems                              NewsFeedItemToRider[]
   InstagramProfile                       InstagramProfile?                @relation(fields: [instagramProfileId], references: [id])
   TikTokProfile                          TikTokProfile?                   @relation(fields: [tiktokProfileId], references: [id])
@@ -961,6 +1071,9 @@ model RiderId {
   ProChampionshipStandings               ProChampionshipStanding[]
   SupportedBrands                        RiderSupportedBrand[]
   TrainingFacilities                     RiderTrainingFacility[]
+  TrainerRosters                         RiderTrainer[]
+  TrainerEventAttendances                TrainerEventAttendance[]
+  TrainerRidingProfiles                  Trainer[]                        @relation("TrainerRidingProfile")
   OffroadRaceEventClassResults           OffroadRaceEventClassResult[]
   DirtyOneHundredClassResults            DirtyOneHundredClassResult[]
   RaceSeriesClasses                      RaceSeriesClass[]
@@ -976,6 +1089,13 @@ model RiderId {
   GiveawayEnrollments                    GiveawayEnrollment[]
   GiveawayRiderOutcomes                  GiveawayRiderOutcome[]
   TracksideRaceOrderEntries              TracksideRaceOrderEntry[]
+  WearableConnections                    WearableConnection[]
+  RiderDayMetrics                        RiderDayMetrics[]
+  RiderWearableActivities                RiderWearableActivity[]
+  WearableActivityFeedback               WearableActivityFeedback[]
+  AmaRaceClassResults                    AmaRaceClassResult[]
+  AmaRacers                              AmaRacer[]
+  RankingCandidates                      RiderRankingCandidate[]
 
   @@index([id])
   @@index([instagramUsername])
@@ -1041,6 +1161,7 @@ model RaceEventSignup {
   startDate              DateTime
   endDate                DateTime?
   onlineSignupUrl        String?
+  videoUrl               String?
   imageUrl               String?
   avatarImageUrl         String?
   detailOverview         String?
@@ -1121,6 +1242,7 @@ model Track {
   name               String
   city               String                  @default("")
   state              String                  @default("")
+  country            String                  @default("US")
   phone              String                  @default("")
   address            String                  @default("")
   mailingAddress     String                  @default("")
@@ -1150,10 +1272,11 @@ model Track {
   Videos             TrackVideo[]
   Images             TrackImage[]
   RaceEventSignups   RaceEventSignup[]
-  RidersShredded     RiderIdTrackShredded[]
-  TrackAdmins        TrackAdmin[]
-  PracticeSessions   TrackPracticeSession[]
-  Amenities          TrackAmenities?
+  RidersShredded          RiderIdTrackShredded[]
+  TrackAdmins             TrackAdmin[]
+  PracticeSessions        TrackPracticeSession[]
+  RiderIdPracticeSessions RiderIdPracticeSession[]
+  Amenities               TrackAmenities?
   NewsItems          NewsFeedItemToTrack[]
   featuredPurchases  FeaturedTrackPurchase[]
   adWallet           TrackAdWallet?
@@ -1165,6 +1288,8 @@ model Track {
   RacePromoter       RacePromoter?           @relation(fields: [racePromoterId], references: [id])
   TrackPhotos        TrackPhoto[]
   RaceEvents         RaceEvent[]
+  TrainerTracks      TrainerTrack[]
+  TrainerEvents      TrainerEvent[]
 }
 
 model TrackAmenities {
@@ -1328,6 +1453,72 @@ model RiderIdTrackShredded {
   Track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
 
   @@unique([riderId, trackId])
+}
+
+/// Ad-hoc "I'm practicing here now" check-in (distinct from scheduled TrackPracticeSession).
+model RiderIdPracticeSession {
+  id           String   @id @default(cuid())
+  riderId      String
+  trackId      String
+  userId       String
+  practiceDate DateTime @db.Date
+  checkedInAt  DateTime @default(now())
+  latitude     Float?
+  longitude    Float?
+  Rider        RiderId  @relation(fields: [riderId], references: [id], onDelete: Cascade)
+  Track        Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Feedback     RiderIdPracticeSessionFeedback?
+  Photos       RiderIdPracticeSessionPhoto[]
+  WearableLinks PracticeWearableActivity[]
+
+  @@unique([riderId, trackId, practiceDate])
+  @@index([trackId, practiceDate])
+  @@index([userId, practiceDate])
+}
+
+model RiderIdPracticeSessionFeedback {
+  id                String   @id @default(cuid())
+  practiceSessionId String   @unique
+  trainingType      String?
+  trackCondition    String?
+  riderFeelRating   Int?
+  description       String?  @db.Text
+  weatherSnapshot   Json?
+  submittedAt       DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  PracticeSession   RiderIdPracticeSession @relation(fields: [practiceSessionId], references: [id], onDelete: Cascade)
+}
+
+model RiderIdPracticeSessionPhoto {
+  id                String   @id @default(cuid())
+  practiceSessionId String
+  imageUrl          String
+  sortOrder         Int      @default(0)
+  createdAt         DateTime @default(now())
+  PracticeSession   RiderIdPracticeSession @relation(fields: [practiceSessionId], references: [id], onDelete: Cascade)
+
+  @@index([practiceSessionId])
+}
+
+/// Effort XP ledger. IQ (execution) is not stored here — it is rolled up from race result scores.
+model RiderXpEvent {
+  id         String   @id @default(cuid())
+  riderId    String
+  userId     String?
+  source     String
+  sourceId   String
+  xp         Int
+  occurredOn DateTime @db.Date
+  createdAt  DateTime @default(now())
+  metadata   Json?
+  Rider      RiderId  @relation(fields: [riderId], references: [id], onDelete: Cascade)
+  User       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([riderId, source, sourceId])
+  @@index([riderId, occurredOn])
+  @@index([riderId, source, occurredOn])
 }
 
 model UserTrackFavorited {
@@ -1644,6 +1835,9 @@ model IncentiveRedemption {
   redeemedAt       DateTime      @default(now())
   /// For RESULT_TO_QR_CODE: set when the dealer completes redemption on the public /incentives/[id] page (code revealed).
   dealerRedeemedAt DateTime?
+  /// Set by the MotoSport promo-redemption webhook when the code is used on a motosport.com order.
+  motosportOrderId     String?   @unique
+  motosportRedeemedAt  DateTime?
   expiresAt        DateTime? // When the redemption expires
   isExpired        Boolean       @default(false)
   notes            String? // Any admin notes
@@ -2210,6 +2404,10 @@ model CrmBrand {
   isSocialCardsEnabled    Boolean @default(false)
   isCommunicationsEnabled Boolean @default(false)
   isProgramTiersLocked    Boolean @default(true)
+  isMarketingEnabled      Boolean @default(false)
+
+  // Google Ad Manager
+  googleAdManagerAdvertiserId String?
 
   // Discovery flags
   isFeatured   Boolean @default(false)
@@ -2238,6 +2436,9 @@ model CrmBrand {
   featuredPurchases        FeaturedBrandPurchase[]
   budgetAlerts             BrandAdBudgetAlert[]
   adAssets                 BrandAdAsset[]
+  marketingWallet          MarketingWallet?
+  marketingCampaigns       MarketingCampaign[]
+  marketingCreativeSets    MarketingCreativeSet[]
   upcomingAttendances      BrandRaceEventSignupAttendance[]
   incentives               Incentive[]
   brandRiderMessageThreads BrandRiderMessageThread[]
@@ -2381,11 +2582,38 @@ model Deal {
   updatedAt DateTime @updatedAt
 
   // Relations
-  brand CrmBrand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  brand        CrmBrand         @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  inboundLeads CrmInboundLead[]
   // tier   PackageTier? @relation(fields: [tierId], references: [id])
   // tierId String?
 
   @@map("deals")
+}
+
+/// Inbound sales-site form submissions received at /api/webhooks/vurbmoto-prospect.
+model CrmInboundLead {
+  id          String   @id @default(cuid())
+  requestId   String   @unique
+  type        String
+  source      String
+  submittedAt DateTime
+  company     String?
+  contactName String?
+  email       String?
+  phone       String?
+  website     String?
+  payload     Json
+  dealId      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  deal Deal? @relation(fields: [dealId], references: [id], onDelete: SetNull)
+
+  @@index([type])
+  @@index([email])
+  @@index([submittedAt])
+  @@index([dealId])
+  @@map("CrmInboundLeads")
 }
 
 // Package Tiers for standardized sponsorship offerings
@@ -2451,6 +2679,7 @@ model BrandAdmin {
   id         String   @id @default(cuid())
   userId     String
   crmBrandId String
+  role       String   @default("MARKETING") // OWNER, MARKETING, DESIGNER, FINANCE
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -2517,7 +2746,9 @@ model BrandProgramTier {
   // Discount code configuration
   codeType  String? // 'fixed' or 'custom'
   fixedCode String? // The discount code if codeType is 'fixed'
-  color     String? // Display color for tier
+  // Where riders redeem the discount code: 'rocky_mountain' | 'motosport' | null (brand website)
+  deliveryMethod String?
+  color          String? // Display color for tier
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -2579,7 +2810,7 @@ model BrandOffer {
   respondedAt          DateTime?
   completedAt          DateTime?
   notes                String?
-  externalHandoffEmail String? // Rider-confirmed email for externally managed tiers (set on accept)
+  externalHandoffEmail String? // Rider-confirmed email for externally managed tiers (set on apply or accept)
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
@@ -2597,6 +2828,7 @@ model BrandOffer {
   assignedTierCustomCode BrandProgramTierCustomCode?
 
   @@index([crmBrandId])
+  @@index([crmBrandId, status, createdAt(sort: Desc)])
   @@index([riderId])
   @@index([status])
   @@index([isCompliant])
@@ -2871,6 +3103,7 @@ model TrainingFacility {
   // Relations
   TrainingFacilityAdmins  TrainingFacilityAdmin[]
   RiderTrainingFacilities RiderTrainingFacility[]
+  TrainingFacilityTrainers TrainingFacilityTrainer[]
   InstagramProfile        InstagramProfile?       @relation(fields: [instagramProfileId], references: [id])
   TikTokProfile           TikTokProfile?          @relation(fields: [tiktokProfileId], references: [id])
   YouTubeProfile          YouTubeProfile?         @relation(fields: [youtubeProfileId], references: [id])
@@ -2915,6 +3148,210 @@ model RiderTrainingFacility {
   @@index([riderId])
   @@index([trainingFacilityId])
   @@map("RiderTrainingFacilities")
+}
+
+// ============================================================================
+// TRAINER MODELS
+// ============================================================================
+
+model Trainer {
+  id                String   @id @default(cuid())
+  name              String
+  bio               String?
+  profilePicUrl     String?
+  coverPhotoUrl     String?
+  email             String?
+  phone             String?
+  website           String?
+  instagramUsername String?
+  tiktokUsername    String?
+  youtubeUsername   String?
+  facebookUsername  String?
+  twitterUsername   String?
+  isUsmcaCertified  Boolean  @default(false)
+  riderProfileId    String?
+  city              String   @default("")
+  state             String   @default("")
+  isFeatured        Boolean  @default(false)
+  isClaimed         Boolean  @default(false)
+  isHidden          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  RiderProfile              RiderId?                  @relation("TrainerRidingProfile", fields: [riderProfileId], references: [id])
+  TrainerAdmins             TrainerAdmin[]
+  RiderTrainers             RiderTrainer[]
+  TrainerTracks             TrainerTrack[]
+  TrainerEvents             TrainerEvent[]
+  TrainingFacilityTrainers  TrainingFacilityTrainer[]
+  TrainerFollowers          TrainerFollower[]         @relation("TrainerFollowedBy")
+  TrainerChatMembers        TrainerChatMember[]
+  TrainerChatMessages       TrainerChatMessage[]
+  users                     User[]
+
+  @@index([name])
+  @@index([city, state])
+  @@index([isFeatured])
+  @@index([isClaimed])
+  @@index([isHidden])
+  @@map("Trainers")
+}
+
+model TrainerAdmin {
+  id        String   @id @default(cuid())
+  userId    String
+  trainerId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainer Trainer @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, trainerId])
+  @@index([userId])
+  @@index([trainerId])
+  @@map("TrainerAdmins")
+}
+
+model RiderTrainer {
+  id        String   @id @default(cuid())
+  riderId   String
+  trainerId String
+  addedBy   String?
+  createdAt DateTime @default(now())
+
+  rider   RiderId @relation(fields: [riderId], references: [id], onDelete: Cascade)
+  trainer Trainer @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@unique([riderId, trainerId])
+  @@index([riderId])
+  @@index([trainerId])
+  @@map("RiderTrainers")
+}
+
+model TrainerTrack {
+  id        String   @id @default(cuid())
+  trainerId String
+  trackId   String
+  createdAt DateTime @default(now())
+
+  trainer Trainer @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  track   Track   @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@unique([trainerId, trackId])
+  @@index([trainerId])
+  @@index([trackId])
+  @@map("TrainerTracks")
+}
+
+model TrainingFacilityTrainer {
+  id                 String   @id @default(cuid())
+  trainingFacilityId String
+  trainerId          String
+  createdAt          DateTime @default(now())
+
+  trainingFacility TrainingFacility @relation(fields: [trainingFacilityId], references: [id], onDelete: Cascade)
+  trainer          Trainer          @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@unique([trainingFacilityId, trainerId])
+  @@index([trainingFacilityId])
+  @@index([trainerId])
+  @@map("TrainingFacilityTrainers")
+}
+
+model TrainerEvent {
+  id              String    @id @default(cuid())
+  trainerId       String
+  trackId         String
+  title           String
+  description     String?
+  startDate       DateTime
+  endDate         DateTime?
+  onlineSignupUrl String?
+  imageUrl        String?
+  isHidden        Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  trainer Trainer @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  track   Track   @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  attendances TrainerEventAttendance[]
+
+  @@index([trainerId])
+  @@index([trackId])
+  @@index([startDate])
+  @@map("TrainerEvents")
+}
+
+model TrainerFollower {
+  id        String   @id @default(cuid())
+  userId    String
+  trainerId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation("UserFollowingTrainer", fields: [userId], references: [id], onDelete: Cascade)
+  trainer Trainer @relation("TrainerFollowedBy", fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, trainerId])
+  @@index([trainerId])
+  @@index([trainerId, createdAt])
+  @@map("TrainerFollowers")
+}
+
+model TrainerEventAttendance {
+  id             String   @id @default(cuid())
+  trainerEventId String
+  riderId        String
+  userId         String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  trainerEvent TrainerEvent @relation(fields: [trainerEventId], references: [id], onDelete: Cascade)
+  rider        RiderId      @relation(fields: [riderId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([trainerEventId, riderId])
+  @@index([trainerEventId])
+  @@index([riderId])
+  @@index([createdAt])
+  @@map("TrainerEventAttendance")
+}
+
+model TrainerChatMember {
+  id                       String    @id @default(cuid())
+  userId                   String
+  trainerId                String
+  pushNotificationsEnabled Boolean   @default(true)
+  lastReadAt               DateTime?
+  joinedAt                 DateTime  @default(now())
+  leftAt                   DateTime?
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainer Trainer @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, trainerId])
+  @@index([trainerId])
+  @@index([userId])
+  @@index([trainerId, leftAt])
+  @@map("TrainerChatMembers")
+}
+
+model TrainerChatMessage {
+  id          String   @id @default(cuid())
+  trainerId   String
+  userId      String
+  body        String?  @db.Text
+  messageType String   @default("text")
+  imageUrl    String?  @db.Text
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  trainer Trainer @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([trainerId, createdAt])
+  @@index([userId])
+  @@map("TrainerChatMessages")
 }
 
 // ============================================================================
@@ -3322,10 +3759,14 @@ model FantasyFeaturedEvent {
   slug                 String           @unique
   description          String?
   year                 Int?
+  /// Cover art when no linked race event (e.g. coming_soon contests)
+  coverImageUrl        String?
   /// Max contests a user may enter for rollup (e.g. 5 classes)
   maxClassPicks        Int              @default(5)
   /// How many top contest scores count toward featured-event total (e.g. 2)
   bestClassScoresCount Int              @default(2)
+  /// Total motos for the event (e.g. 3 for Loretta's) — powers in-progress UI
+  motoCount            Int?
   isFeatured           Boolean          @default(false)
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
@@ -3344,8 +3785,10 @@ model FantasyContest {
   type               String
   classLabel         String
   pickCount          Int
+  /// Max overall finishing position users may predict (e.g. 42 for Loretta's)
+  maxPredictedPosition Int            @default(42)
   lockAt             DateTime
-  /// draft | open | locked | live | scoring | final | void
+  /// draft | coming_soon | open | locked | live | scoring | final | void
   status             String                  @default("draft")
   rulesSummary       String?
   tieBreakerLabel    String?
@@ -3488,7 +3931,7 @@ model ProspectGroupInvite {
 // PROSPECT GIVEAWAY ENGINE
 // ============================================================================
 
-/// CHALLENGE | SWEEPSTAKE
+/// CHALLENGE (laps led / top-N) | MOST_PASSES_CHALLENGE | SWEEPSTAKE
 model GiveawayCampaign {
   id                  String     @id @default(cuid())
   slug                String     @unique
@@ -3644,4 +4087,601 @@ model GiveawaySweepstakeDraw {
 
   @@index([campaignId])
   @@map("GiveawaySweepstakeDraws")
+}
+
+// ============================================================================
+// PROSPECT MARKETING PLATFORM
+// ============================================================================
+
+model MarketingProperty {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  platform  String // APP, WEB
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  slots MarketingSlot[]
+
+  @@index([isActive])
+  @@map("MarketingProperties")
+}
+
+model MarketingSlot {
+  id                    String   @id @default(cuid())
+  propertyId            String
+  name                  String
+  slug                  String
+  description           String?
+  platform              String // APP, WEB
+  dimensions            String
+  requiredWidth         Int?
+  requiredHeight        Int?
+  supportedSizes        Json?
+  defaultCpmCents       Int      @default(1500)
+  minCpmCents           Int      @default(500)
+  googleAdUnitId        String?
+  priority              Int      @default(0)
+  historicalImpressions Int      @default(0)
+  historicalCpmCents    Int      @default(1500)
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  property         MarketingProperty          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  pricingRules     MarketingPricingRule[]
+  placements       MarketingPlacement[]
+  creativeVariants MarketingCreativeVariant[]
+
+  @@unique([propertyId, slug])
+  @@index([propertyId])
+  @@index([platform, isActive])
+  @@map("MarketingSlots")
+}
+
+model MarketingPricingRule {
+  id         String   @id @default(cuid())
+  slotId     String
+  scope      String // NATIONAL, STATE, LOCALITY
+  state      String?
+  locality   String?
+  cpmCents   Int
+  multiplier Float    @default(1.0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  slot MarketingSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+
+  @@unique([slotId, scope, state, locality])
+  @@index([slotId])
+  @@index([scope, isActive])
+  @@map("MarketingPricingRules")
+}
+
+model MarketingWallet {
+  id                 String   @id @default(cuid())
+  brandId            String   @unique
+  balanceCents       Int      @default(0)
+  reservedCents      Int      @default(0)
+  lifetimeSpendCents Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  brand         CrmBrand               @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  ledgerEntries MarketingLedgerEntry[]
+
+  @@map("MarketingWallets")
+}
+
+model MarketingLedgerEntry {
+  id                    String   @id @default(cuid())
+  walletId              String
+  amountCents           Int
+  entryType             String // CREDIT, DEBIT, RESERVE, RELEASE, SPEND, REFUND, ADJUSTMENT, STRIPE_REFILL
+  campaignId            String?
+  description           String?
+  createdBy             String?
+  stripePaymentIntentId String?
+  createdAt             DateTime @default(now())
+
+  wallet   MarketingWallet    @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  campaign MarketingCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@index([walletId])
+  @@index([campaignId])
+  @@index([entryType])
+  @@index([createdAt])
+  @@map("MarketingLedgerEntries")
+}
+
+model MarketingCreativeSet {
+  id                  String   @id @default(cuid())
+  brandId             String
+  name                String
+  logoUrl             String?
+  headline            String?
+  body                String?
+  cta                 String?
+  landingUrl          String?
+  primaryImageUrl     String?
+  aiPromptHistoryJson Json?
+  version             Int      @default(1)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  brand      CrmBrand                   @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  variants   MarketingCreativeVariant[]
+  campaigns  MarketingCampaign[]
+  placements MarketingPlacement[]
+
+  @@index([brandId])
+  @@map("MarketingCreativeSets")
+}
+
+model MarketingCreativeVariant {
+  id                        String   @id @default(cuid())
+  creativeSetId             String
+  slotId                    String?
+  imageUrl                  String
+  width                     Int
+  height                    Int
+  status                    String   @default("APPROVED") // APPROVED, PENDING, REJECTED
+  googleAdManagerCreativeId String?
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  creativeSet MarketingCreativeSet @relation(fields: [creativeSetId], references: [id], onDelete: Cascade)
+  slot        MarketingSlot?       @relation(fields: [slotId], references: [id], onDelete: SetNull)
+
+  @@index([creativeSetId])
+  @@index([slotId])
+  @@map("MarketingCreativeVariants")
+}
+
+model MarketingCampaign {
+  id                      String    @id @default(cuid())
+  brandId                 String
+  name                    String
+  status                  String    @default("DRAFT") // DRAFT, REVIEW, SCHEDULED, ACTIVE, PAUSED, COMPLETED, CANCELLED
+  currentStep             String    @default("BASICS") // BASICS, PLACEMENTS, CREATIVES, TARGETING, ESTIMATES, BUDGET, REVIEW
+  channelType             String    @default("BANNER_AD")
+  objective               String? // BRAND_AWARENESS, TRAFFIC, CONVERSIONS
+  budgetCents             Int?
+  pacing                  String    @default("EVEN") // EVEN, AS_FAST_AS_POSSIBLE
+  startAt                 DateTime?
+  endAt                   DateTime?
+  calculatedCpmCents      Int?
+  estimatedImpressionsMin Int?
+  estimatedImpressionsMax Int?
+  targetingJson           Json?
+  creativeSetId           String?
+  googleAdManagerOrderId  String?
+  launchedBy              String?
+  launchedAt              DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  brand         CrmBrand               @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  creativeSet   MarketingCreativeSet?  @relation(fields: [creativeSetId], references: [id], onDelete: SetNull)
+  placements    MarketingPlacement[]
+  ledgerEntries MarketingLedgerEntry[]
+
+  @@index([brandId])
+  @@index([status])
+  @@index([currentStep])
+  @@map("MarketingCampaigns")
+}
+
+model MarketingPlacement {
+  id                        String   @id @default(cuid())
+  campaignId                String
+  slotId                    String
+  creativeSetId             String?
+  targetingJson             Json?
+  cpmCents                  Int?
+  status                    String   @default("PENDING") // PENDING, ACTIVE, COMPLETED, CANCELLED
+  googleAdManagerLineItemId String?
+  impressions               Int      @default(0)
+  clicks                    Int      @default(0)
+  spendCents                Int      @default(0)
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  campaign    MarketingCampaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  slot        MarketingSlot         @relation(fields: [slotId], references: [id])
+  creativeSet MarketingCreativeSet? @relation(fields: [creativeSetId], references: [id], onDelete: SetNull)
+
+  @@index([campaignId])
+  @@index([slotId])
+  @@index([status])
+  @@map("MarketingPlacements")
+}
+
+model MarketingAuditLog {
+  id          String   @id @default(cuid())
+  entityType  String
+  entityId    String
+  action      String
+  actorUserId String?
+  beforeJson  Json?
+  afterJson   Json?
+  createdAt   DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorUserId])
+  @@index([createdAt])
+  @@map("MarketingAuditLogs")
+}
+
+model MarketingReportSnapshot {
+  id          String   @id @default(cuid())
+  campaignId  String
+  slotId      String?
+  date        DateTime @db.Date
+  impressions Int      @default(0)
+  clicks      Int      @default(0)
+  spendCents  Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@unique([campaignId, slotId, date])
+  @@index([campaignId])
+  @@index([date])
+  @@map("MarketingReportSnapshots")
+}
+
+enum WearableProvider {
+  whoop
+  garmin
+  healthkit
+}
+
+enum WearableConnectionStatus {
+  active
+  disconnected
+}
+
+model WearableConnection {
+  id                 String                    @id @default(cuid())
+  riderId            String
+  provider           WearableProvider
+  externalUserId     String
+  accessToken        String                    @db.Text
+  refreshToken       String?                   @db.Text
+  tokenExpiresAt     DateTime?
+  scopes             String                    @default("")
+  connectedByUserId  String
+  status             WearableConnectionStatus  @default(active)
+  lastSyncedAt       DateTime?
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+  Rider              RiderId                   @relation(fields: [riderId], references: [id], onDelete: Cascade)
+  ConnectedByUser    User                      @relation(fields: [connectedByUserId], references: [id], onDelete: Cascade)
+
+  @@unique([riderId, provider])
+  @@unique([provider, externalUserId])
+  @@index([riderId, status])
+  @@index([connectedByUserId])
+}
+
+model WearableWebhookEvent {
+  id             String            @id @default(cuid())
+  provider       WearableProvider
+  traceId        String            @unique
+  externalUserId String
+  externalId     String
+  type           String
+  processedAt    DateTime?
+  createdAt      DateTime          @default(now())
+  payload        Json?
+
+  @@index([provider, createdAt])
+  @@index([externalUserId])
+}
+
+model RiderDayMetrics {
+  id                String            @id @default(cuid())
+  riderId           String
+  dateKey           String
+  source            WearableProvider
+  recoveryScore     Float?
+  strain            Float?
+  sleepPerformance  Float?
+  sleepHours        Float?
+  rhr               Int?
+  hrvRmssd          Float?
+  payload           Json?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  Rider             RiderId           @relation(fields: [riderId], references: [id], onDelete: Cascade)
+
+  @@unique([riderId, dateKey, source])
+  @@index([riderId, dateKey])
+  @@index([source, dateKey])
+}
+
+model RiderWearableActivity {
+  id          String            @id @default(cuid())
+  riderId     String
+  source      WearableProvider
+  externalId  String
+  startedAt   DateTime
+  endedAt     DateTime
+  sportName   String
+  strain      Float?
+  avgHeartRate Int?
+  maxHeartRate Int?
+  scoreState  String
+  deletedAt   DateTime?
+  payload     Json?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  Rider       RiderId           @relation(fields: [riderId], references: [id], onDelete: Cascade)
+  PracticeLinks PracticeWearableActivity[]
+
+  @@unique([source, externalId])
+  @@index([riderId, startedAt])
+  @@index([riderId, source])
+}
+
+/// Explicit join from a Prospect practice to a wearable workout. One practice can
+/// include some, but not all, activities from the same calendar day.
+model PracticeWearableActivity {
+  id                 String   @id @default(cuid())
+  practiceSessionId  String
+  wearableActivityId String
+  createdAt          DateTime @default(now())
+  PracticeSession    RiderIdPracticeSession @relation(fields: [practiceSessionId], references: [id], onDelete: Cascade)
+  WearableActivity   RiderWearableActivity @relation(fields: [wearableActivityId], references: [id], onDelete: Cascade)
+
+  @@unique([practiceSessionId, wearableActivityId])
+  @@index([wearableActivityId])
+}
+
+/// Classifier feedback for a practice day or a single wearable activity.
+model WearableActivityFeedback {
+  id                 String   @id @default(cuid())
+  riderId            String
+  dateKey            String
+  scope              String
+  wearableActivityId String   @default("")
+  decision           String
+  suggested          Boolean?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  Rider              RiderId  @relation(fields: [riderId], references: [id], onDelete: Cascade)
+
+  @@unique([riderId, dateKey, scope, wearableActivityId])
+  @@index([riderId, dateKey])
+  @@index([wearableActivityId])
+}
+
+model AmaPromoter {
+  id             String        @id @default(cuid())
+  sourceId       Int           @unique
+  slug           String        @unique
+  name           String
+  website        String?
+  sourceUserId   Int?
+  payload        Json?
+  racePromoterId String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  RacePromoter   RacePromoter? @relation(fields: [racePromoterId], references: [id])
+  AmaRaces       AmaRace[]
+
+  @@index([racePromoterId])
+  @@index([name])
+  @@map("AmaPromoters")
+}
+
+model AmaRace {
+  id              String         @id @default(cuid())
+  sourceId        Int?           @unique
+  slug            String         @unique
+  name            String
+  startedAt       DateTime
+  endedAt         DateTime?
+  sport           String
+  discipline      String
+  amaDiscipline   String?
+  venueName       String?
+  city            String         @default("")
+  state           String         @default("")
+  postalCode      String?
+  region          String?
+  district        String?
+  season          String?
+  isProAm         Boolean        @default(false)
+  sourceUpdatedAt DateTime?
+  status          String         @default("pending")
+  lastSyncedAt    DateTime?
+  hasResults      Boolean        @default(false)
+  payload         Json?
+  amaPromoterId   String?
+  raceEventId     String?        @unique
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  AmaPromoter     AmaPromoter?   @relation(fields: [amaPromoterId], references: [id])
+  RaceEvent       RaceEvent?     @relation(fields: [raceEventId], references: [id])
+  AmaRaceClasses  AmaRaceClass[]
+
+  @@index([amaPromoterId])
+  @@index([sport, discipline])
+  @@index([season])
+  @@index([startedAt])
+  @@index([status])
+  @@map("AmaRaces")
+}
+
+model AmaRaceClass {
+  id                  String               @id @default(cuid())
+  sourceId            Int?
+  slug                String               @unique
+  name                String
+  status              String?
+  hasResults          Boolean              @default(false)
+  amaClass            String?
+  isCombined          Boolean              @default(false)
+  isAdvancement       Boolean              @default(false)
+  isProAm             Boolean              @default(false)
+  type                String?
+  payload             Json?
+  amaRaceId           String
+  raceEventClassId    String?              @unique
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  AmaRace             AmaRace              @relation(fields: [amaRaceId], references: [id], onDelete: Cascade)
+  RaceEventClass      RaceEventClass?      @relation(fields: [raceEventClassId], references: [id])
+  AmaRaceClassResults AmaRaceClassResult[]
+
+  @@index([amaRaceId])
+  @@index([raceEventClassId])
+  @@map("AmaRaceClasses")
+}
+
+model AmaRaceClassResult {
+  id              String       @id @default(cuid())
+  racerName       String
+  racerSlug       String
+  racerNumber     String
+  racerClass      String?
+  positionInClass Int?
+  positionStatus  String?
+  points          String?
+  moto1Finish     String?
+  moto2Finish     String?
+  moto3Finish     String?
+  payload         Json?
+  amaRaceClassId  String
+  amaRacerId      String?
+  riderId         String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  AmaRaceClass    AmaRaceClass @relation(fields: [amaRaceClassId], references: [id], onDelete: Cascade)
+  AmaRacer        AmaRacer?    @relation(fields: [amaRacerId], references: [id])
+  RiderId         RiderId?     @relation(fields: [riderId], references: [id])
+
+  @@unique([amaRaceClassId, racerSlug])
+  @@index([racerNumber])
+  @@index([racerName])
+  @@index([riderId])
+  @@index([amaRaceClassId])
+  @@index([amaRacerId])
+  @@map("AmaRaceClassResults")
+}
+
+model AmaRacer {
+  id              String               @id @default(cuid())
+  sourceId        Int?
+  slug            String               @unique
+  firstName       String?
+  lastName        String?
+  name            String
+  amaNumber       String?
+  hometown        String?
+  city            String?
+  state           String?
+  birthdate       String?
+  mxLevel         String?
+  orLevel         String?
+  levels          Json?
+  summary         Json?
+  advancements    Json?
+  status          String               @default("pending")
+  sourceUpdatedAt DateTime?
+  lastSyncedAt    DateTime?
+  payload         Json?
+  riderId         String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  RiderId         RiderId?             @relation(fields: [riderId], references: [id])
+  AmaRaceClassResults AmaRaceClassResult[]
+  AmaRacerAdvancements AmaRacerAdvancement[]
+
+  @@index([amaNumber])
+  @@index([name])
+  @@index([riderId])
+  @@index([status])
+  @@map("AmaRacers")
+}
+
+model AmaRacerAdvancement {
+  id          String   @id @default(cuid())
+  sport       String
+  advancedAt  DateTime?
+  fromLevel   String?
+  toLevel     String?
+  reason      String?
+  payload     Json?
+  amaRacerId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  AmaRacer    AmaRacer @relation(fields: [amaRacerId], references: [id], onDelete: Cascade)
+
+  @@index([amaRacerId])
+  @@index([sport])
+  @@index([advancedAt])
+  @@map("AmaRacerAdvancements")
+}
+
+model RiderRankingModel {
+  id              String                   @id @default(cuid())
+  name            String
+  slug            String                   @unique
+  season          Int
+  seedClassName   String
+  description     String?
+  isDefault       Boolean                  @default(false)
+  status          String                   @default("draft")
+  createdBy       String?
+  lastCalculatedAt DateTime?
+  weightsJson     Json?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  Candidates      RiderRankingCandidate[]
+  Rules           RiderRankingRule[]
+
+  @@index([season, seedClassName])
+  @@map("RiderRankingModels")
+}
+
+model RiderRankingCandidate {
+  id                  String             @id @default(cuid())
+  rankingModelId      String
+  riderId             String
+  seedClassName       String
+  season              Int
+  currentRank         Int?
+  previousRank        Int?
+  overallScore        Float              @default(0)
+  qualificationStatus String             @default("CANDIDATE")
+  generatedAt         DateTime           @default(now())
+  analyticsJson       Json
+  RankingModel        RiderRankingModel  @relation(fields: [rankingModelId], references: [id], onDelete: Cascade)
+  RiderId             RiderId            @relation(fields: [riderId], references: [id], onDelete: Cascade)
+
+  @@unique([rankingModelId, riderId])
+  @@index([rankingModelId, currentRank])
+  @@index([rankingModelId, overallScore])
+  @@index([riderId])
+  @@map("RiderRankingCandidates")
+}
+
+model RiderRankingRule {
+  id                String            @id @default(cuid())
+  rankingModelId    String
+  ruleType          String
+  name              String
+  description       String?
+  configurationJson Json
+  priority          Int               @default(100)
+  enabled           Boolean           @default(true)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  RankingModel      RiderRankingModel @relation(fields: [rankingModelId], references: [id], onDelete: Cascade)
+
+  @@index([rankingModelId, enabled, priority])
+  @@map("RiderRankingRules")
 }

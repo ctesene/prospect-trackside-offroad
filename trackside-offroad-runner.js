@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const { Logging, Sentry, Redis } = require("@vurb-tech/shared");
+require("./sentry-init");
 const { EVENT_TYPE } = require("./handlers/trackside-offroad-handler");
 
 const STREAM =
