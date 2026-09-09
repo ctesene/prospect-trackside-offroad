@@ -632,6 +632,10 @@ model OffroadRaceEventClass {
   scoringSystemEventClassId    String
   classTypeId                  String? // Class type ID (e.g., "2" for WORCS MC)
   classTypeName                String? // Class type name (e.g., "WORCS MC", "WORCS ATV")
+  // Aggregate standing ("Overall", "A Overall", "Novice Overall") rather than a
+  // real class. Promoters publish these alongside classes, so the rows duplicate
+  // riders already scored in their class. Winning one is NOT a class win.
+  isOverallGrouping            Boolean                       @default(false)
   score                        Float?
   createdAt                    DateTime                      @default(now())
   updatedAt                    DateTime                      @updatedAt
@@ -641,6 +645,7 @@ model OffroadRaceEventClass {
 
   @@index([id])
   @@index([offroadRaceEventId])
+  @@index([offroadRaceEventId, isOverallGrouping], map: "offroad_race_event_classes_event_overall_idx")
   @@map("OffroadRaceEventClasses")
 }
 
@@ -777,6 +782,7 @@ model User {
   RacePromoterAdmins              RacePromoterAdmin[]
   RacePromoterBroadcastsSent      RacePromoterBroadcast[]
   WearableConnections             WearableConnection[]
+  ManufacturerAdmins              ManufacturerAdmin[]
 }
 
 model FeedRankingConfig {
@@ -1096,6 +1102,9 @@ model RiderId {
   AmaRaceClassResults                    AmaRaceClassResult[]
   AmaRacers                              AmaRacer[]
   RankingCandidates                      RiderRankingCandidate[]
+  ManufacturerRiderListMembers           ManufacturerRiderListMember[]
+  MoneyballLorettasClassRiders           MoneyballLorettasClassRider[]
+  MoneyballLorettasSeasonResults         MoneyballLorettasRiderSeasonResults[]
 
   @@index([id])
   @@index([instagramUsername])
@@ -1897,20 +1906,66 @@ model RiderIncentive {
 }
 
 model Manufacturer {
-  id        String         @id @default(cuid())
-  name      String         @unique
-  slug      String         @unique // URL-friendly version (e.g., "honda", "yamaha")
-  logoUrl   String?
-  website   String?
-  isActive  Boolean        @default(true)
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-  models    VehicleModel[]
-  vehicles  Vehicle[]
+  id            String              @id @default(cuid())
+  name          String              @unique
+  slug          String              @unique // URL-friendly version (e.g., "honda", "yamaha")
+  logoUrl       String?
+  website       String?
+  branding      Json? // OEM portal theme: colors, image URLs, slogan
+  portalEnabled Boolean             @default(false)
+  isActive      Boolean             @default(true)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  models        VehicleModel[]
+  vehicles      Vehicle[]
+  admins        ManufacturerAdmin[]
+  riderLists    ManufacturerRiderList[]
 
   @@index([name])
   @@index([slug])
   @@index([isActive])
+  @@index([portalEnabled])
+}
+
+model ManufacturerAdmin {
+  id             String       @id @default(cuid())
+  userId         String
+  manufacturerId String
+  role           String       @default("ADMIN")
+  createdAt      DateTime     @default(now())
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, manufacturerId])
+  @@index([manufacturerId])
+}
+
+model ManufacturerRiderList {
+  id             String                        @id @default(cuid())
+  manufacturerId String
+  name           String
+  isDefault      Boolean                       @default(false)
+  sortOrder      Int                           @default(0)
+  createdAt      DateTime                      @default(now())
+  updatedAt      DateTime                      @updatedAt
+  manufacturer   Manufacturer                  @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  members        ManufacturerRiderListMember[]
+
+  @@index([manufacturerId])
+  @@index([manufacturerId, isDefault])
+}
+
+model ManufacturerRiderListMember {
+  id        String                @id @default(cuid())
+  listId    String
+  riderId   String
+  createdAt DateTime              @default(now())
+  list      ManufacturerRiderList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  rider     RiderId               @relation(fields: [riderId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, riderId])
+  @@index([riderId])
+  @@index([listId])
 }
 
 model VehicleModel {
@@ -4684,4 +4739,82 @@ model RiderRankingRule {
 
   @@index([rankingModelId, enabled, priority])
   @@map("RiderRankingRules")
+}
+
+/// Canonical Lorettas class for a Moneyball season (raw aggregate — no scoring).
+/// Built once per year after area qualifiers complete.
+model MoneyballLorettasClass {
+  id             String                      @id @default(cuid())
+  /// Season / AQ year (e.g. 2026 nationals path).
+  year           Int
+  /// Exact Lorettas class name as scraped (e.g. "250 B Limited").
+  className      String
+  /// Lowercase trimmed key for grouping/joins.
+  classKey       String
+  riderCount     Int                         @default(0)
+  aqResultCount  Int                         @default(0)
+  builtAt        DateTime                    @default(now())
+  updatedAt      DateTime                    @updatedAt
+  /// Optional class-level metadata (source class ids, regions seen, etc.).
+  metaJson       Json?
+  Riders         MoneyballLorettasClassRider[]
+
+  @@unique([year, classKey])
+  @@index([year])
+  @@index([year, className])
+  @@map("MoneyballLorettasClasses")
+}
+
+/// Rider who posted at least one AQ result in a Moneyball Lorettas class/year.
+model MoneyballLorettasClassRider {
+  id              String                 @id @default(cuid())
+  classId         String
+  riderId         String
+  year            Int
+  /// Best (lowest) overall finish number across AQ starts in this class/year.
+  bestOverall     Int?
+  aqStarts        Int                    @default(0)
+  advancingCount  Int                    @default(0)
+  /// Condensed AQ finishes for this rider+class+year. See specs/moneyball-lorettas-raw.md.
+  aqResultsJson   Json
+  builtAt         DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  Class           MoneyballLorettasClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  RiderId         RiderId                @relation(fields: [riderId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, riderId])
+  @@index([year, riderId])
+  @@index([riderId])
+  @@index([classId, bestOverall])
+  @@map("MoneyballLorettasClassRiders")
+}
+
+/// Prior-season race results for a rider in the Moneyball AQ pool (raw, condensed JSON).
+model MoneyballLorettasRiderSeasonResults {
+  id           String   @id @default(cuid())
+  riderId      String
+  /// Calendar year of the results (typically Moneyball class year - 1).
+  seasonYear   Int
+  /// Moneyball season this row was built for (AQ year).
+  moneyballYear Int
+  resultCount  Int      @default(0)
+  /// Condensed RaceEventClassResult rows (excludes AQ/RQ tiers 2 & 4). See specs/moneyball-lorettas-raw.md.
+  resultsJson  Json
+  /// Count of Lorettas Regional Qualifier finishes in seasonYear.
+  regionalResultCount Int @default(0)
+  /// Condensed LorettasRegionalQualifierResult rows for seasonYear. See specs/moneyball-lorettas-raw.md.
+  regionalResultsJson Json @default("[]")
+  /// Count of personal-fastest lap samples attached from season RaceLaptime rows.
+  paceSampleCount Int @default(0)
+  /// Condensed personal-fastest laps keyed by race class. See specs/moneyball-lorettas-raw.md.
+  paceSamplesJson Json @default("[]")
+  builtAt      DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  RiderId      RiderId  @relation(fields: [riderId], references: [id], onDelete: Cascade)
+
+  @@unique([riderId, seasonYear, moneyballYear])
+  @@index([moneyballYear])
+  @@index([seasonYear])
+  @@index([riderId])
+  @@map("MoneyballLorettasRiderSeasonResults")
 }
