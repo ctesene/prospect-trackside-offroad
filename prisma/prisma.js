@@ -6,11 +6,11 @@ const pkg = require("../package.json");
 // identifies the worker holding a connection instead of showing blank.
 const APP_NAME = process.env.PRISMA_APP_NAME || pkg.name || "unknown-process";
 
-// Applied only when the connection URL doesn't already specify them. Without an
-// explicit limit Prisma defaults to (cpu count * 2) + 1 per pool, which on the
-// larger droplets is ~17 connections per pool, three pools deep.
+// connection_limit is always applied so a leftover URL param cannot keep a
+// quiet worker at 5. Override with PRISMA_CONNECTION_LIMIT when a process
+// actually parallelizes queries. pool_timeout is a fallback only.
+const POOL_LIMIT = process.env.PRISMA_CONNECTION_LIMIT || "2";
 const POOL_FALLBACKS = {
-  connection_limit: process.env.PRISMA_CONNECTION_LIMIT || "5",
   pool_timeout: process.env.PRISMA_POOL_TIMEOUT || "20",
 };
 
@@ -41,6 +41,8 @@ const withPoolParams = (url, role) => {
       params.set(key, value);
     }
   }
+
+  params.set("connection_limit", POOL_LIMIT);
 
   for (const [key, value] of Object.entries(POOL_LIFETIMES)) {
     params.set(key, value);
